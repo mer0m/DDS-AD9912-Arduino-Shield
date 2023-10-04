@@ -256,7 +256,7 @@ void DDS_FTW_Send (uint64_t *BUFF_DDS)
 uint64_t DDS_Freq_To_FTW(uint64_t Freq, uint64_t Fs)
   {
     uint64_t FTW;
-    FTW = (uint64_t) (281474976710656 * (Freq / (float) Fs)); //DDS_FTW_Send(&DDS_Freq_To_FTW());
+    FTW = (uint64_t) (281474976.710656 * (Freq / (float) Fs)); //DDS_FTW_Send(&DDS_Freq_To_FTW());
     return FTW;
   }
 

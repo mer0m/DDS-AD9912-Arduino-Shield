@@ -17,7 +17,7 @@ Max Core freq: 1360MHz
 
 #include <GParser.h>
 
-#define DBG 0
+#define DBG 1
 
 #define FIRMWAREVERSION 1.04
 //v1.04 22.06.2023
@@ -76,17 +76,19 @@ bool isPWR_DWN = false;
 #define MAIN_MENU_MHZ_INDEX 0
 #define MAIN_MENU_KHZ_INDEX 1
 #define MAIN_MENU_HZ_INDEX 2
-#define MAIN_MENU_HSTL_INDEX 3
-#define MAIN_MENU_CMOS_INDEX 4
-#define MAIN_MENU_CMOS_DIVIDER_KHZ_INDEX 5
-#define MAIN_MENU_CMOS_DIVIDER_HZ_INDEX 6
-#define MAIN_MENU_DBM_INDEX 7
-#define MAIN_MENU_SWEEP_INDEX 8
-#define MAIN_MENU_SK_INDEX 9
+#define MAIN_MENU_LHZ_INDEX 3
+#define MAIN_MENU_UHZ_INDEX 4
+#define MAIN_MENU_HSTL_INDEX 5
+#define MAIN_MENU_CMOS_INDEX 6
+#define MAIN_MENU_CMOS_DIVIDER_KHZ_INDEX 7
+#define MAIN_MENU_CMOS_DIVIDER_HZ_INDEX 8
+#define MAIN_MENU_DBM_INDEX 9
+#define MAIN_MENU_SWEEP_INDEX 10
+#define MAIN_MENU_SK_INDEX 11
 
 #define MAIN_MENU_LAST_INDEX MAIN_MENU_SK_INDEX
 
-int M, K, H, A, MenuPos;
+int M, K, H, L, U, A, MenuPos;
 uint16_t CMOS_Divider;
 uint16_t CMOS_Divider_KHz, CMOS_Divider_Hz;
 bool CMOS_State;
@@ -166,6 +168,8 @@ void loop()
         case MAIN_MENU_MHZ_INDEX:
         case MAIN_MENU_KHZ_INDEX:
         case MAIN_MENU_HZ_INDEX:
+        case MAIN_MENU_LHZ_INDEX:
+        case MAIN_MENU_UHZ_INDEX:
         case MAIN_MENU_CMOS_DIVIDER_KHZ_INDEX:
         case MAIN_MENU_CMOS_DIVIDER_HZ_INDEX:
         case MAIN_MENU_DBM_INDEX:
@@ -212,13 +216,19 @@ void loop()
       switch (MenuPos)
       {
         case MAIN_MENU_MHZ_INDEX:
-          if (Check (M + curPos, K, H)) M = Inc(M, curPos);
+          if (Check (M + curPos, K, H, L, U)) M = Inc(M, curPos);
         break;
         case MAIN_MENU_KHZ_INDEX:
-          if (Check (M, K + curPos, H)) K = Inc(K, curPos);
+          if (Check (M, K + curPos, H, L, U)) K = Inc(K, curPos);
         break;
         case MAIN_MENU_HZ_INDEX:
-          if (Check (M, K, H + curPos)) H = Inc(H, curPos);
+          if (Check (M, K, H + curPos, L, U)) H = Inc(H, curPos);
+        break;
+        case MAIN_MENU_LHZ_INDEX:
+          if (Check (M, K, H, L + curPos, U)) L = Inc(L, curPos);
+        break;
+        case MAIN_MENU_UHZ_INDEX:
+          if (Check (M, K, H, L, U + curPos)) U = Inc(U, curPos);
         break;
         //Check_Div
         case MAIN_MENU_CMOS_DIVIDER_KHZ_INDEX:
@@ -239,13 +249,19 @@ void loop()
       switch (MenuPos)
       {
         case MAIN_MENU_MHZ_INDEX:
-          if (Check(M + curPos, K, H)) M = Dec(M, curPos);
+          if (Check(M + curPos, K, H, L, U)) M = Dec(M, curPos);
         break;
         case MAIN_MENU_KHZ_INDEX:
-          if (Check(M, K + curPos, H)) K = Dec(K, curPos);
+          if (Check(M, K + curPos, H, L, U)) K = Dec(K, curPos);
         break;
         case MAIN_MENU_HZ_INDEX:
-          if (Check(M, K, H + curPos)) H = Dec(H, curPos);
+          if (Check(M, K, H + curPos, L, U)) H = Dec(H, curPos);
+        break;
+        case MAIN_MENU_LHZ_INDEX:
+          if (Check(M, K, H, L + curPos, U)) L = Dec(L, curPos);
+        break;
+        case MAIN_MENU_UHZ_INDEX:
+          if (Check(M, K, H, L, U + curPos)) U = Dec(U, curPos);
         break;
         //Check_Div
         case MAIN_MENU_CMOS_DIVIDER_KHZ_INDEX:
@@ -272,9 +288,9 @@ void loop()
   }
 }
 
-uint32_t GetFreqValue()
+uint64_t GetFreqValue()
 {
-  return M * 1000000L + K * 1000L + H;
+  return M * 1000000000000 + K * 1000000000 + H * 1000000 + L * 1000 + U ;
 }
 
 uint16_t GetCMOSDividerValue()
@@ -334,6 +350,14 @@ void MakeOut()
 
   DDS_Current(dBmToCurrent[A]);
   //DDS_Freq_Set(M * 1000000L + K * 1000L + H, DDS_Core_Clock); //GetDDSCoreClock()
+#if DBG==1
+  uint64_t _Freq = GetFreqValue();
+  Serial.print("GetFreqValue=");
+  Serial.println((uint32_t) _Freq/1000000L);
+  Serial.println((uint32_t) _Freq%1000000L);
+  Serial.print("DDS_Core_Clock=");
+  Serial.println(DDS_Core_Clock);
+#endif
   DDS_Freq_Set(GetFreqValue(), DDS_Core_Clock); //GetDDSCoreClock()
 
   //SingleProfileFreqOut(M * 1000000L + K * 1000L + H, A * -1);
@@ -369,11 +393,11 @@ int32_t Dec(int32_t val, int decr)
 /*****************************************************************
 
  ***************************************************************/
-bool Check(uint16_t _M, uint16_t _K, uint16_t _H)
+bool Check(uint16_t _M, uint16_t _K, uint16_t _H, uint16_t _L, uint16_t _U)
 {
-  long F_Val;
-  F_Val = _M * 1000000L + _K * 1000L + _H;
-  if ((F_Val >= LOW_FREQ_LIMIT) && (F_Val <= HIGH_FREQ_LIMIT)) {GetFreqValue(); return 1;}
+  uint64_t F_Val;
+  F_Val = _M * 1000000000000L + _K * 1000000000L + _H * 1000000L + _L * 1000L + _U;
+  if ((F_Val >= (uint64_t) LOW_FREQ_LIMIT * 1000000L) && (F_Val <= (uint64_t) HIGH_FREQ_LIMIT * 1000000L)) {GetFreqValue(); return 1;}
   else return 0;
 }
 
@@ -390,6 +414,8 @@ void SaveMainSettings()
   EEPROM.put(M_ADR, M);
   EEPROM.put(K_ADR, K);
   EEPROM.put(H_ADR, H);
+  //EEPROM.put(L_ADR, L);
+  //EEPROM.put(U_ADR, U);
   EEPROM.put(A_ADR, A);
 
   EEPROM.put(HSTL_STATE_EEPROM_ADR, HSTL_State);
@@ -414,6 +440,8 @@ void LoadMainSettings()
     M = INIT_M;
     K = INIT_K;
     H = INIT_H;
+    L = 0;//INIT_L;
+    U = 0;//INIT_U;
     A = INIT_A;
     HSTL_State = INIT_HSTL_STATE;
     CMOS_State = INIT_CMOS_STATE;
@@ -428,6 +456,10 @@ void LoadMainSettings()
     Serial.println(K);
     Serial.print("H=");
     Serial.println(H);
+    Serial.print("L=");
+    Serial.println(L);
+    Serial.print("U=");
+    Serial.println(U);
     Serial.print("A=");
     Serial.println(A);
     Serial.print("HSTL_State=");
@@ -445,6 +477,8 @@ void LoadMainSettings()
     EEPROM.get(M_ADR, M);
     EEPROM.get(K_ADR, K);
     EEPROM.get(H_ADR, H);
+    //EEPROM.get(L_ADR, L);
+    //EEPROM.get(U_ADR, U);
     EEPROM.get(A_ADR, A);
 
     EEPROM.get(HSTL_STATE_EEPROM_ADR, HSTL_State);
@@ -459,6 +493,10 @@ void LoadMainSettings()
     Serial.println(K);
     Serial.print("H=");
     Serial.println(H);
+    Serial.print("L=");
+    Serial.println(L);
+    Serial.print("U=");
+    Serial.println(U);
     Serial.print("A=");
     Serial.println(A);
     Serial.print("HSTL_State=");
@@ -524,33 +562,45 @@ void DrawMainMenu()
   display.setCursor(100, 15);
   display.print(F("G&A"));
 
-  display.setCursor(0, 30);
+  display.setFont(NULL);
+  display.setCursor(0, 15);
   display.print(F("RF"));
 
-  display.setFont(NULL);
-  display.setCursor(18, 20);
+  display.setCursor(12, 20);
   if (!isPWR_DWN) display.print(F("Out"));
     else display.print(F("OFF"));
-  display.setFont(&font);
+  //display.setFont(&font);
   
-  display.setCursor(33, 30);
-  display.print(F(":"));
-
-  display.setCursor(47, 30);
+  display.setFont(NULL);
+  display.setCursor(30, 15);
   if (MenuPos==MAIN_MENU_MHZ_INDEX) GetColor();
   display.print(PreZero(M));
   display.setTextColor(WHITE);
 
-  display.setCursor(74, 30);
+  display.setCursor(48, 15);
   if (MenuPos==MAIN_MENU_KHZ_INDEX) GetColor();
   display.print(PreZero(K));
   display.setTextColor(WHITE);
 
-  display.setCursor(101, 30);
+  display.setCursor(66, 15);
   if (MenuPos==MAIN_MENU_HZ_INDEX) GetColor();
   display.print(PreZero(H));
   display.setTextColor(WHITE);
-  
+
+  display.setCursor(84, 15);
+  display.print(F("."));
+
+  display.setCursor(90, 15);
+  if (MenuPos==MAIN_MENU_LHZ_INDEX) GetColor();
+  display.print(PreZero(L));
+  display.setTextColor(WHITE);
+
+  display.setCursor(108, 15);
+  if (MenuPos==MAIN_MENU_UHZ_INDEX) GetColor();
+  display.print(PreZero(U));
+  display.setTextColor(WHITE);
+  display.setFont(&font);
+
   display.setCursor(0, 42);
   if (MenuPos==MAIN_MENU_HSTL_INDEX) GetColor();
   display.print(F("HSTL"));
@@ -563,8 +613,8 @@ void DrawMainMenu()
   if (HSTL_State != HSTL_OFF)
   {
     char chrHSTLtmpBuff[10]; //Перенести в глобальные переменные
-    if (HSTL_State == HSTL_ON) sprintf(chrHSTLtmpBuff, "%10lu", GetFreqValue());
-      else sprintf(chrHSTLtmpBuff, "%10lu", GetFreqValue()*2);
+    if (HSTL_State == HSTL_ON) sprintf(chrHSTLtmpBuff, "%10lu", GetFreqValue() / 1000);
+      else sprintf(chrHSTLtmpBuff, "%10lu", GetFreqValue() / 1000 * 2);
     display.print(chrHSTLtmpBuff); //
   } else display.print(F(" ---OFF---"));
     
@@ -581,7 +631,7 @@ void DrawMainMenu()
   if (CMOS_State == true)
   {
     char chrCMOStmpBuff[9]; //Перенести в глобальные переменные
-    sprintf(chrCMOStmpBuff, "%9lu", GetFreqValue()/GetCMOSDividerValue());
+    sprintf(chrCMOStmpBuff, "%9lu", GetFreqValue() / 1000 / GetCMOSDividerValue());
     display.print(chrCMOStmpBuff);
   } else display.print(F("---OFF---"));
   

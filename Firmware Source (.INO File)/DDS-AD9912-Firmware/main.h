@@ -36,7 +36,7 @@ extern void DrawMainMenu();
 extern void MakeOut();
 extern void DDS_Init ();
 extern void DDS_Freq_Set(uint64_t Freq, uint64_t Fs); //думаю это лучше убрать отсюда
-extern bool Check(uint16_t _M, uint16_t _K, uint16_t _H);
+extern bool Check(uint16_t _M, uint16_t _K, uint16_t _H, uint16_t _L, uint16_t _U);
 extern int32_t Inc(int32_t val, int incr);
 extern int32_t Dec(int32_t val, int decr);
 

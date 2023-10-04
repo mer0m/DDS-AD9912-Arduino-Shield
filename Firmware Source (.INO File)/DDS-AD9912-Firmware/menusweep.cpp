@@ -178,23 +178,23 @@ void SweepMenu()
       switch (SweepMenuPos)
       {
         case MENU_SWEEP_START_FREQ_M_INDEX:
-          if (Check(SweepStartFreqM + SweepEncoderPos, SweepStartFreqK, SweepStartFreqH)) SweepStartFreqM = Inc(SweepStartFreqM, SweepEncoderPos);
+          if (Check(SweepStartFreqM + SweepEncoderPos, SweepStartFreqK, SweepStartFreqH, 0, 0)) SweepStartFreqM = Inc(SweepStartFreqM, SweepEncoderPos);
         break;
         case MENU_SWEEP_START_FREQ_K_INDEX:
-          if (Check(SweepStartFreqM, SweepStartFreqK + SweepEncoderPos, SweepStartFreqH)) SweepStartFreqK = Inc(SweepStartFreqK, SweepEncoderPos);
+          if (Check(SweepStartFreqM, SweepStartFreqK + SweepEncoderPos, SweepStartFreqH, 0, 0)) SweepStartFreqK = Inc(SweepStartFreqK, SweepEncoderPos);
         break;
         case MENU_SWEEP_START_FREQ_H_INDEX:
-          if (Check(SweepStartFreqM, SweepStartFreqK, SweepStartFreqH + SweepEncoderPos)) SweepStartFreqH = Inc(SweepStartFreqH, SweepEncoderPos);
+          if (Check(SweepStartFreqM, SweepStartFreqK, SweepStartFreqH + SweepEncoderPos, 0, 0)) SweepStartFreqH = Inc(SweepStartFreqH, SweepEncoderPos);
         break;
 
         case MENU_SWEEP_END_FREQ_M_INDEX:
-          if (Check(SweepEndFreqM + SweepEncoderPos, SweepEndFreqK, SweepEndFreqH)) SweepEndFreqM = Inc(SweepEndFreqM, SweepEncoderPos);
+          if (Check(SweepEndFreqM + SweepEncoderPos, SweepEndFreqK, SweepEndFreqH, 0, 0)) SweepEndFreqM = Inc(SweepEndFreqM, SweepEncoderPos);
         break;
         case MENU_SWEEP_END_FREQ_K_INDEX:
-          if (Check(SweepEndFreqM, SweepEndFreqK + SweepEncoderPos, SweepEndFreqH)) SweepEndFreqK = Inc(SweepEndFreqK, SweepEncoderPos);
+          if (Check(SweepEndFreqM, SweepEndFreqK + SweepEncoderPos, SweepEndFreqH, 0, 0)) SweepEndFreqK = Inc(SweepEndFreqK, SweepEncoderPos);
         break;
         case MENU_SWEEP_END_FREQ_H_INDEX:
-          if (Check(SweepEndFreqM, SweepEndFreqK, SweepEndFreqH + SweepEncoderPos)) SweepEndFreqH = Inc(SweepEndFreqH, SweepEncoderPos);
+          if (Check(SweepEndFreqM, SweepEndFreqK, SweepEndFreqH + SweepEncoderPos, 0, 0)) SweepEndFreqH = Inc(SweepEndFreqH, SweepEncoderPos);
         break;
 
         case MENU_SWEEP_TIME_INDEX:
@@ -209,23 +209,23 @@ void SweepMenu()
       switch (SweepMenuPos)
       {
         case MENU_SWEEP_START_FREQ_M_INDEX:
-          if (Check(SweepStartFreqM + SweepEncoderPos, SweepStartFreqK, SweepStartFreqH)) SweepStartFreqM = Dec(SweepStartFreqM, SweepEncoderPos);
+          if (Check(SweepStartFreqM + SweepEncoderPos, SweepStartFreqK, SweepStartFreqH, 0, 0)) SweepStartFreqM = Dec(SweepStartFreqM, SweepEncoderPos);
         break;
         case MENU_SWEEP_START_FREQ_K_INDEX:
-          if (Check(SweepStartFreqM, SweepStartFreqK + SweepEncoderPos, SweepStartFreqH)) SweepStartFreqK = Dec(SweepStartFreqK, SweepEncoderPos);
+          if (Check(SweepStartFreqM, SweepStartFreqK + SweepEncoderPos, SweepStartFreqH, 0, 0)) SweepStartFreqK = Dec(SweepStartFreqK, SweepEncoderPos);
         break;
         case MENU_SWEEP_START_FREQ_H_INDEX:
-          if (Check(SweepStartFreqM, SweepStartFreqK, SweepStartFreqH + SweepEncoderPos)) SweepStartFreqH = Dec(SweepStartFreqH, SweepEncoderPos);
+          if (Check(SweepStartFreqM, SweepStartFreqK, SweepStartFreqH + SweepEncoderPos, 0, 0)) SweepStartFreqH = Dec(SweepStartFreqH, SweepEncoderPos);
         break;
 
         case MENU_SWEEP_END_FREQ_M_INDEX:
-          if (Check(SweepEndFreqM + SweepEncoderPos, SweepEndFreqK, SweepEndFreqH)) SweepEndFreqM = Dec(SweepEndFreqM, SweepEncoderPos);
+          if (Check(SweepEndFreqM + SweepEncoderPos, SweepEndFreqK, SweepEndFreqH, 0, 0)) SweepEndFreqM = Dec(SweepEndFreqM, SweepEncoderPos);
         break;
         case MENU_SWEEP_END_FREQ_K_INDEX:
-          if (Check(SweepEndFreqM, SweepEndFreqK + SweepEncoderPos, SweepEndFreqH)) SweepEndFreqK = Dec(SweepEndFreqK, SweepEncoderPos);
+          if (Check(SweepEndFreqM, SweepEndFreqK + SweepEncoderPos, SweepEndFreqH, 0, 0)) SweepEndFreqK = Dec(SweepEndFreqK, SweepEncoderPos);
         break;
         case MENU_SWEEP_END_FREQ_H_INDEX:
-          if (Check(SweepEndFreqM, SweepEndFreqK, SweepEndFreqH + SweepEncoderPos)) SweepEndFreqH = Dec(SweepEndFreqH, SweepEncoderPos);
+          if (Check(SweepEndFreqM, SweepEndFreqK, SweepEndFreqH + SweepEncoderPos, 0, 0)) SweepEndFreqH = Dec(SweepEndFreqH, SweepEncoderPos);
         break;
 
         case MENU_SWEEP_TIME_INDEX:
