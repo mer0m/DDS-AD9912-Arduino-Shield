@@ -53,12 +53,14 @@ bool isPWR_DWN = false;
 #define M_ADR 24
 #define K_ADR 28
 #define H_ADR 32
-#define A_ADR 36
+#define L_ADR 36
+#define U_ADR 40
+#define A_ADR 44
 
-#define HSTL_STATE_EEPROM_ADR 40
-#define CMOS_STATE_EEPROM_ADR 44
-#define CMOS_DIV_KHZ_EEPROM_ADR 48
-#define CMOS_DIV_HZ_EEPROM_ADR 52
+#define HSTL_STATE_EEPROM_ADR 48
+#define CMOS_STATE_EEPROM_ADR 52
+#define CMOS_DIV_KHZ_EEPROM_ADR 56
+#define CMOS_DIV_HZ_EEPROM_ADR 60
 
 #define MAIN_SETTINGS_FLAG_ADR 100 // defualt settings 
 // ADR 101 reserved for clock settings
@@ -66,6 +68,8 @@ bool isPWR_DWN = false;
 #define INIT_M 100
 #define INIT_K 0
 #define INIT_H 0
+#define INIT_L 0
+#define INIT_U 0
 #define INIT_A 7
 #define INIT_HSTL_STATE HSTL_OFF
 #define INIT_CMOS_STATE 0
@@ -290,7 +294,11 @@ void loop()
 
 uint64_t GetFreqValue()
 {
-  return M * 1000000000000 + K * 1000000000 + H * 1000000 + L * 1000 + U ;
+  return   M * 1000000000000L
+         + K * 1000000000L
+         + H * 1000000L
+         + L * 1000L
+         + U ;
 }
 
 uint16_t GetCMOSDividerValue()
@@ -350,14 +358,6 @@ void MakeOut()
 
   DDS_Current(dBmToCurrent[A]);
   //DDS_Freq_Set(M * 1000000L + K * 1000L + H, DDS_Core_Clock); //GetDDSCoreClock()
-#if DBG==1
-  uint64_t _Freq = GetFreqValue();
-  Serial.print("GetFreqValue=");
-  Serial.println((uint32_t) _Freq/1000000L);
-  Serial.println((uint32_t) _Freq%1000000L);
-  Serial.print("DDS_Core_Clock=");
-  Serial.println(DDS_Core_Clock);
-#endif
   DDS_Freq_Set(GetFreqValue(), DDS_Core_Clock); //GetDDSCoreClock()
 
   //SingleProfileFreqOut(M * 1000000L + K * 1000L + H, A * -1);
@@ -414,8 +414,8 @@ void SaveMainSettings()
   EEPROM.put(M_ADR, M);
   EEPROM.put(K_ADR, K);
   EEPROM.put(H_ADR, H);
-  //EEPROM.put(L_ADR, L);
-  //EEPROM.put(U_ADR, U);
+  EEPROM.put(L_ADR, L);
+  EEPROM.put(U_ADR, U);
   EEPROM.put(A_ADR, A);
 
   EEPROM.put(HSTL_STATE_EEPROM_ADR, HSTL_State);
@@ -440,8 +440,8 @@ void LoadMainSettings()
     M = INIT_M;
     K = INIT_K;
     H = INIT_H;
-    L = 0;//INIT_L;
-    U = 0;//INIT_U;
+    L = INIT_L;
+    U = INIT_U;
     A = INIT_A;
     HSTL_State = INIT_HSTL_STATE;
     CMOS_State = INIT_CMOS_STATE;
@@ -477,8 +477,8 @@ void LoadMainSettings()
     EEPROM.get(M_ADR, M);
     EEPROM.get(K_ADR, K);
     EEPROM.get(H_ADR, H);
-    //EEPROM.get(L_ADR, L);
-    //EEPROM.get(U_ADR, U);
+    EEPROM.get(L_ADR, L);
+    EEPROM.get(U_ADR, U);
     EEPROM.get(A_ADR, A);
 
     EEPROM.get(HSTL_STATE_EEPROM_ADR, HSTL_State);
@@ -555,15 +555,15 @@ void DrawMainMenu()
   display.print(F("A/B"));
 
   display.setFont(&font);
-  display.setCursor(0, 15); //
+  display.setCursor(0, 18); //
   //display.setTextColor(BLACK, WHITE); 
   display.setTextColor(WHITE); 
   display.print(F("DDS9912")); 
-  display.setCursor(100, 15);
+  display.setCursor(100, 18);
   display.print(F("G&A"));
 
   display.setFont(NULL);
-  display.setCursor(0, 15);
+  display.setCursor(0, 18);
   display.print(F("RF"));
 
   display.setCursor(12, 20);
@@ -572,30 +572,30 @@ void DrawMainMenu()
   //display.setFont(&font);
   
   display.setFont(NULL);
-  display.setCursor(30, 15);
+  display.setCursor(30, 18);
   if (MenuPos==MAIN_MENU_MHZ_INDEX) GetColor();
   display.print(PreZero(M));
   display.setTextColor(WHITE);
 
-  display.setCursor(48, 15);
+  display.setCursor(48, 18);
   if (MenuPos==MAIN_MENU_KHZ_INDEX) GetColor();
   display.print(PreZero(K));
   display.setTextColor(WHITE);
 
-  display.setCursor(66, 15);
+  display.setCursor(66, 18);
   if (MenuPos==MAIN_MENU_HZ_INDEX) GetColor();
   display.print(PreZero(H));
   display.setTextColor(WHITE);
 
-  display.setCursor(84, 15);
+  display.setCursor(84, 18);
   display.print(F("."));
 
-  display.setCursor(90, 15);
+  display.setCursor(90, 18);
   if (MenuPos==MAIN_MENU_LHZ_INDEX) GetColor();
   display.print(PreZero(L));
   display.setTextColor(WHITE);
 
-  display.setCursor(108, 15);
+  display.setCursor(108, 18);
   if (MenuPos==MAIN_MENU_UHZ_INDEX) GetColor();
   display.print(PreZero(U));
   display.setTextColor(WHITE);

@@ -1,8 +1,7 @@
-
 #define SERIAL_PACKAGE_MAX_LENGTH 33
 char SerialBuffer[SERIAL_PACKAGE_MAX_LENGTH];
 
-const char HELP_STRING [] PROGMEM = "F - set Frequency in Hz (100000 - 500000000)\n"
+const char HELP_STRING [] PROGMEM = "F - set Frequency in Hz (100000.000000 - 500000000.000000)\n"
           "H - Set HSTL Output: 0 - OFF, 1 - ON, 2 - Doubler\n"
           "C - Set CMOS Output: 0 - OFF, 1 - ON\n"
           "D - Set CMOS Divider (1 - 65353)\n"
@@ -28,6 +27,7 @@ void ReadSerialCommands()
   SerialBuffer[RcvCounter]='\0';
 
   int32_t value=0;
+  int32_t value_dec=0;
   char command;
 
   GParser data(SerialBuffer, ';');
@@ -39,15 +39,33 @@ void ReadSerialCommands()
     switch (command)
     {
       case 'F': //RF Frequency
+        char freq_s[16];
+		sscanf(data[i], "%c%s", &command, &freq_s);
+		GParser freq_parser(freq_s, '.');
+		if (freq_parser.split() == 2)
+		{
+		    sscanf(freq_parser[1], "%ld", &value_dec);
+			value_dec = value_dec * 1000000;
+			for (int j=0; j < strlen(freq_parser[1]); j++)
+			{
+				value_dec = value_dec / 10;
+			}
+		}
+		sscanf(freq_parser[0], "%ld", &value);
         if (inRange(value, LOW_FREQ_LIMIT, HIGH_FREQ_LIMIT))
         {
           Serial.print(F("Set freq.: "));
-          Serial.println(value);
+		  Serial.print(value);
+		  Serial.print('.');
+		  Serial.println(value_dec);
           H = value % 1000;
           value = value / 1000;
           K = value % 1000;
           value = value / 1000;
           M = value; 
+          U = value_dec % 1000;
+          value_dec = value_dec / 1000;
+          L = value_dec % 1000;
         } else Serial.println("Frequency is OUT OF RANGE (" + String(LOW_FREQ_LIMIT) + " - " + String(HIGH_FREQ_LIMIT) + ")");
       break;
 

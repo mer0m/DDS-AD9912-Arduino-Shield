@@ -7,6 +7,7 @@
 #include "Arduino.h"
 #include <stdint.h>
 #include <inttypes.h>
+#include <fp64lib.h>
 #include <SPI.h>
 #include "menuclk.h"
 
@@ -18,9 +19,10 @@
 #define IO_update 6
 #define RESET_PIN 7
 
-
 #define S1_PIN 4
-#define S4_PIN 9 
+#define S4_PIN 9
+
+//#define DEBUG
 
 uint8_t strBuffer[8];
 uint32_t DAC_Current;
@@ -237,8 +239,14 @@ void DDS_Freq_Set(uint64_t Freq, uint64_t Fs)
 ***************************************************************************/
 void DDS_FTW_Send (uint64_t *BUFF_DDS)
   {
+#ifdef DEBUG
+  Serial.println(*(((uint16_t*)BUFF_DDS)+ 2), HEX);
+  Serial.println(*(((uint16_t*)BUFF_DDS)+ 1), HEX);
+  Serial.println(*(((uint16_t*)BUFF_DDS)+ 0), HEX);
+#endif
+
   digitalWrite(SPI_CS, LOW); // CS = 0  Start transmission
-   
+
   SPI.transfer16((uint16_t)ADDR_FTW); // send Instruction Word 16bit  
   SPI.transfer16(*(((uint16_t*)BUFF_DDS)+ 2)); // send Frequncy Word H
   SPI.transfer16( *(((uint16_t*)BUFF_DDS)+ 1)); // send Frequncy Word  
@@ -255,8 +263,20 @@ void DDS_FTW_Send (uint64_t *BUFF_DDS)
 ******************************************************************************/
 uint64_t DDS_Freq_To_FTW(uint64_t Freq, uint64_t Fs)
   {
-    uint64_t FTW;
-    FTW = (uint64_t) (281474976.710656 * (Freq / (float) Fs)); //DDS_FTW_Send(&DDS_Freq_To_FTW());
+	float64_t Freqf = fp64_div(fp64_uint64_to_float64(Freq), fp64_uint64_to_float64(1000000L));
+	float64_t Fsf = fp64_uint64_to_float64(Fs);
+	float64_t inv_stepf = fp64_div(fp64_uint64_to_float64(281474976710656L), Fsf);
+	float64_t incrf = fp64_mul(Freqf, inv_stepf);
+
+#ifdef DEBUG
+	Serial.println(fp64_to_string(Freqf, 32, 8));
+	Serial.println(fp64_to_string(Fsf, 32, 8));
+	Serial.println(fp64_to_string(inv_stepf, 32, 8));
+	Serial.println(fp64_to_string(incrf, 32, 8));
+#endif
+
+    uint64_t FTW = fp64_to_uint64(fp64_round(incrf));
+    //FTW = (uint64_t) (281474976.710656 * (Freq / (float) Fs)); //DDS_FTW_Send(&DDS_Freq_To_FTW());
     return FTW;
   }
 
