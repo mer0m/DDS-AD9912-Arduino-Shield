@@ -17,9 +17,13 @@ Max Core freq: 1360MHz
 
 #include <GParser.h>
 
-#define DBG 1
+#define DBG 0
 
-#define FIRMWAREVERSION 1.04
+#define FIRMWAREVERSION 1.05
+//v1.05 07.10.2023
+//Use the FTW with its full resolution.
+//The main menu allows to set the frequency with a uHz precision.
+//The F command allows to set the frequency with a uHz precision.
 //v1.04 22.06.2023
 //Turn-on(E) and turn-off(S) commands have been added.
 //v1.03 20.06.2023
