@@ -39,38 +39,41 @@ void ReadSerialCommands()
     switch (command)
     {
       case 'F': //RF Frequency
-        char freq_s[16];
-		sscanf(data[i], "%c%s", &command, &freq_s);
-		GParser freq_parser(freq_s, '.');
-		if (freq_parser.split() == 2)
+	    if (inRange(value, LOW_FREQ_LIMIT, HIGH_FREQ_LIMIT))
 		{
-		    sscanf(freq_parser[1], "%ld", &value_dec);
-			value_dec = value_dec * 1000000;
-			for (int j=0; j < strlen(freq_parser[1]); j++)
-			{
-				value_dec = value_dec / 10;
-			}
+          char freq_s[16];
+          sscanf(data[i], "%c%s", &command, &freq_s);
+          GParser freq_parser(freq_s, '.');
+          if (freq_parser.split() == 2)
+          {
+              sscanf(freq_parser[1], "%ld", &value_dec);
+              value_dec = value_dec * 1000000;
+              for (int j=0; j < strlen(freq_parser[1]); j++)
+              {
+                  value_dec = value_dec / 10;
+              }
+          }
+          sscanf(freq_parser[0], "%ld", &value);
+          if (inRange(value, LOW_FREQ_LIMIT, HIGH_FREQ_LIMIT))
+          {
+            Serial.print(F("Set freq.: "));
+            Serial.print(value);
+            Serial.print('.');
+            Serial.println(value_dec);
+            H = value % 1000;
+            value = value / 1000;
+            K = value % 1000;
+            value = value / 1000;
+            M = value; 
+            U = value_dec % 1000;
+            value_dec = value_dec / 1000;
+            L = value_dec % 1000;
+          } else Serial.println("Frequency is OUT OF RANGE (" + String(LOW_FREQ_LIMIT) + " - " + String(HIGH_FREQ_LIMIT) + ")");
 		}
-		sscanf(freq_parser[0], "%ld", &value);
-        if (inRange(value, LOW_FREQ_LIMIT, HIGH_FREQ_LIMIT))
-        {
-          Serial.print(F("Set freq.: "));
-		  Serial.print(value);
-		  Serial.print('.');
-		  Serial.println(value_dec);
-          H = value % 1000;
-          value = value / 1000;
-          K = value % 1000;
-          value = value / 1000;
-          M = value; 
-          U = value_dec % 1000;
-          value_dec = value_dec / 1000;
-          L = value_dec % 1000;
-        } else Serial.println("Frequency is OUT OF RANGE (" + String(LOW_FREQ_LIMIT) + " - " + String(HIGH_FREQ_LIMIT) + ")");
       break;
 
       case 'H': //HSTL 0 - OFF, 1 - ON, 2 - Doubler
-      if (inRange(value, 0, 2))
+        if (inRange(value, 0, 2))
         {
           Serial.print(F("Set HSTL: "));
           Serial.println(value);
